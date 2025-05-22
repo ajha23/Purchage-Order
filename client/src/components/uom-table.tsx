@@ -55,13 +55,18 @@ export default function UOMTable() {
   const filteredAndSortedData = [...uomData]
     .filter(uom => 
       uom.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      uom.name.toLowerCase().includes(searchTerm.toLowerCase())
+      uom.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (uom.description && uom.description.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (uom.category && uom.category.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     .sort((a, b) => {
+      const aValue = a[sortField] || '';
+      const bValue = b[sortField] || '';
+      
       if (sortDirection === "asc") {
-        return a[sortField] > b[sortField] ? 1 : -1;
+        return aValue > bValue ? 1 : -1;
       } else {
-        return a[sortField] < b[sortField] ? 1 : -1;
+        return aValue < bValue ? 1 : -1;
       }
     });
 

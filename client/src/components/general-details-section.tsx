@@ -24,6 +24,7 @@ import { PurchaseOrderFormValues } from "@/lib/types";
 
 interface GeneralDetailsSectionProps {
   form: UseFormReturn<PurchaseOrderFormValues>;
+  showErrors?: boolean;
 }
 
 export default function GeneralDetailsSection({ form }: GeneralDetailsSectionProps) {

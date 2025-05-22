@@ -16,6 +16,7 @@ interface ItemDetailsSectionProps {
   addItem: () => void;
   removeItem: (index: number) => void;
   updateItem: (index: number, field: keyof LineItem, value: any) => void;
+  showErrors?: boolean;
 }
 
 export default function ItemDetailsSection({
