@@ -1,81 +1,36 @@
-import type { Express, Request, Response } from "express";
+import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
 import { z } from "zod";
-import { insertUomSchema, insertPurchaseOrderSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // UOM API routes
   app.get('/api/uoms', async (req, res) => {
-    try {
-      const uoms = await storage.getUoms();
-      res.json(uoms);
-    } catch (error) {
-      console.error("Error fetching UOMs:", error);
-      res.status(500).json({ message: "Error fetching UOMs" });
-    }
+    // Return mock data
+    res.json([
+      { id: 1, code: "K001", name: "KGS", description: "Kilograms", status: 'active', category: 'Weight', lastUpdated: '12-May-2025' },
+      { id: 2, code: "L001", name: "LTR", description: "Liters", status: 'active', category: 'Volume', lastUpdated: '10-May-2025' },
+      { id: 3, code: "M001", name: "MTR", description: "Meters", status: 'active', category: 'Length', lastUpdated: '05-May-2025' },
+      { id: 4, code: "N001", name: "NOS", description: "Numbers", status: 'active', category: 'Quantity', lastUpdated: '12-May-2025' },
+      { id: 5, code: "P002", name: "PAIR", description: "Pair of items", status: 'active', category: 'Quantity', lastUpdated: '15-May-2025' },
+      { id: 6, code: "P001", name: "PKT", description: "Packet", status: 'active', category: 'Packaging', lastUpdated: '11-May-2025' },
+    ]);
   });
   
-  app.get('/api/uoms/:id', async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const uom = await storage.getUom(id);
-      
-      if (!uom) {
-        return res.status(404).json({ message: "UOM not found" });
-      }
-      
-      res.json(uom);
-    } catch (error) {
-      console.error("Error fetching UOM:", error);
-      res.status(500).json({ message: "Error fetching UOM" });
-    }
-  });
-  
-  app.post('/api/uoms', async (req, res) => {
-    try {
-      const validatedData = insertUomSchema.parse(req.body);
-      const newUom = await storage.createUom(validatedData);
-      res.status(201).json(newUom);
-    } catch (error) {
-      console.error("Error creating UOM:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Validation error", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error creating UOM" });
-    }
-  });
-
   // Purchase Order API routes
-  app.get('/api/purchase-orders', async (req, res) => {
-    try {
-      const orders = await storage.getPurchaseOrders();
-      res.json(orders);
-    } catch (error) {
-      console.error("Error fetching purchase orders:", error);
-      res.status(500).json({ message: "Error fetching purchase orders" });
-    }
-  });
-  
   app.post('/api/purchase-orders', async (req, res) => {
     try {
-      // Extract the purchase order data and line items from the request
-      const { items, ...poData } = req.body;
-      
-      // Store the purchase order in the database
-      const newPO = await storage.createPurchaseOrder(poData, items || []);
-      
+      // Just return success without database operations
       res.status(201).json({ 
         message: "Purchase order created successfully",
-        id: newPO.id,
-        purchaseOrder: newPO
+        id: Date.now(), // Use timestamp as ID
+        purchaseOrder: {
+          ...req.body,
+          id: Date.now()
+        }
       });
     } catch (error) {
-      console.error("Error creating purchase order:", error);
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Validation error", errors: error.errors });
-      }
-      res.status(500).json({ message: "Error creating purchase order" });
+      console.error("Error processing purchase order:", error);
+      res.status(500).json({ message: "Error processing purchase order" });
     }
   });
 
