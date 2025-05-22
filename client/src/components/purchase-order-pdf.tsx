@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
+// @ts-ignore - Fix for TypeScript error with jspdf-autotable
+import { default as autoTable } from 'jspdf-autotable';
 import { LineItem, PurchaseOrder } from '@/lib/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from './ui/button';
@@ -79,8 +81,8 @@ export default function PurchaseOrderPdf({
       item.description || ""
     ]);
     
-    // @ts-ignore - jspdf-autotable extension
-    doc.autoTable({
+    // Fix for jspdf-autotable
+    autoTable(doc, {
       startY: 95,
       head: [['Sl No', 'Item', 'Quantity', 'UOM', 'Rate', 'Discount', 'Final Rate', 'Tax', 'Description']],
       body: itemsTableData,
@@ -89,9 +91,14 @@ export default function PurchaseOrderPdf({
       margin: { top: 95 }
     });
     
-    // Get the y position after the table
-    // @ts-ignore - jspdf-autotable extension
-    const finalY = doc.previousAutoTable.finalY || 150;
+    // Get the y position after the table (default to 150 if not available)
+    let finalY = 150;
+    try {
+      // @ts-ignore - access the last table position
+      finalY = (doc as any).lastAutoTable.finalY;
+    } catch (e) {
+      console.error("Could not get final Y position, using default", e);
+    }
     
     // Add totals
     doc.text(`Basic Total: ${purchaseOrder.basicTotal.toFixed(2)}`, 14, finalY + 10);

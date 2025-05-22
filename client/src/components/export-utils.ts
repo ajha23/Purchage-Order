@@ -1,6 +1,8 @@
 import { utils, writeFile } from 'xlsx';
 import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
+// @ts-ignore - Fix for TypeScript error with jspdf-autotable
+import { default as autoTable } from 'jspdf-autotable';
 
 // Excel export function
 export function exportToExcel<T>(data: T[], filename: string) {
@@ -41,8 +43,8 @@ export function exportUomTableToPdf(
   });
   
   // Create the table
-  // @ts-ignore - jspdf-autotable extension
-  doc.autoTable({
+  // Use the properly imported autoTable function
+  autoTable(doc, {
     startY: 25,
     head: [headers],
     body: tableData,
