@@ -4,7 +4,8 @@ import ItemDetailsSection from "./item-details-section";
 import { usePurchaseOrder } from "@/hooks/use-purchase-order";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { LineItem } from "@/lib/types";
+import { LineItem, PurchaseOrder } from "@/lib/types";
+import PurchaseOrderPdf from "./purchase-order-pdf";
 
 export default function PurchaseOrderForm() {
   const { 
@@ -23,6 +24,8 @@ export default function PurchaseOrderForm() {
 
   const { toast } = useToast();
   const [showErrors, setShowErrors] = useState(false);
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [savedPurchaseOrder, setSavedPurchaseOrder] = useState<PurchaseOrder | undefined>(undefined);
 
   // Create a new item to be added on save
   const [newItem, setNewItem] = useState<LineItem>({
@@ -61,12 +64,28 @@ export default function PurchaseOrderForm() {
       return;
     }
     
-    // If all validations pass, submit the form
+    // If all validations pass, prepare the data and show the PDF
+    const formValues = form.getValues();
+    const purchaseOrder: PurchaseOrder = {
+      ...formValues,
+      items,
+      basicTotal,
+      taxTotal,
+      grandTotal
+    };
+    
+    // Save the purchase order for PDF generation
+    setSavedPurchaseOrder(purchaseOrder);
+    
+    // Open the PDF modal
+    setIsPdfModalOpen(true);
+    
+    // Submit the form
     handleSubmit();
     
     toast({
       title: "Purchase Order Saved",
-      description: "Your purchase order has been successfully saved.",
+      description: "Your purchase order has been generated and is ready for review.",
     });
 
     // Reset new item
@@ -128,6 +147,13 @@ export default function PurchaseOrderForm() {
           showErrors={showErrors}
         />
       </form>
+      
+      {/* Purchase Order PDF Modal */}
+      <PurchaseOrderPdf
+        isOpen={isPdfModalOpen}
+        onClose={() => setIsPdfModalOpen(false)}
+        purchaseOrder={savedPurchaseOrder}
+      />
     </div>
   );
 }

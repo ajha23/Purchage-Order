@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, FilePlus, FileText, Edit, Trash2 } from "lucide-react";
+import { Search, FilePlus, FileText, Edit, Trash2, Download } from "lucide-react";
+import { exportToExcel, exportUomTableToPdf } from "./export-utils";
 
 // UOM data type
 interface UOM {
@@ -75,10 +76,24 @@ export default function UOMTable() {
     if (sortField !== field) return null;
     return sortDirection === "asc" ? "▲" : "▼";
   };
+  
+  // Handle Excel export
+  const handleExportExcel = () => {
+    exportToExcel(filteredAndSortedData, 'UOM_Table');
+  };
+  
+  // Handle PDF export
+  const handleExportPdf = () => {
+    exportUomTableToPdf(
+      filteredAndSortedData,
+      ['id', 'code', 'name', 'description', 'category', 'status', 'lastUpdated'],
+      'UOM_Table'
+    );
+  };
 
   return (
-    <div className="bg-gray-100 min-h-screen">
-      <header className="bg-white shadow">
+    <div>
+      <header className="bg-white shadow mb-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center">
@@ -93,125 +108,105 @@ export default function UOMTable() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="form-actions mb-4">
-          <div className="form-actions-container justify-between">
-            <Button 
-              className="bg-primary hover:bg-primary/90 text-white"
-            >
-              <FilePlus className="h-4 w-4 mr-2" />
-              Add New
-            </Button>
+      <div className="mb-4 bg-white shadow border border-gray-200 py-3 px-4">
+        <div className="flex justify-between items-center">
+          <Button 
+            className="bg-primary hover:bg-primary/90 text-white"
+          >
+            <FilePlus className="h-4 w-4 mr-2" />
+            Add New
+          </Button>
+          <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <span className="mr-2">Search:</span>
+              <span className="mr-2 text-sm">Search:</span>
               <Input 
                 type="text" 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="max-w-xs"
-                placeholder="Search by code, name, or description..."
+                className="max-w-xs h-9"
+                placeholder="Search by code or name..."
               />
-              <div className="ml-4 flex space-x-2">
-                <Button variant="outline" size="sm">
-                  Excel
-                </Button>
-                <Button variant="outline" size="sm">
-                  PDF
-                </Button>
-              </div>
+            </div>
+            <div className="flex space-x-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => handleExportExcel()}
+              >
+                Excel
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="text-xs"
+                onClick={() => handleExportPdf()}
+              >
+                PDF
+              </Button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="form-section">
-          <div className="table-container">
-            <table className="data-table">
-              <thead className="data-table-header">
-                <tr>
-                  <th 
-                    className="data-table-header-cell w-16 cursor-pointer"
-                    onClick={() => handleSort("id")}
-                  >
-                    Sl No {getSortIndicator("id")}
-                  </th>
-                  <th 
-                    className="data-table-header-cell cursor-pointer"
-                    onClick={() => handleSort("code")}
-                  >
-                    Code {getSortIndicator("code")}
-                  </th>
-                  <th 
-                    className="data-table-header-cell cursor-pointer"
-                    onClick={() => handleSort("name")}
-                  >
-                    Name {getSortIndicator("name")}
-                  </th>
-                  <th 
-                    className="data-table-header-cell cursor-pointer"
-                    onClick={() => handleSort("description")}
-                  >
-                    Description {getSortIndicator("description")}
-                  </th>
-                  <th 
-                    className="data-table-header-cell cursor-pointer"
-                    onClick={() => handleSort("category")}
-                  >
-                    Category {getSortIndicator("category")}
-                  </th>
-                  <th 
-                    className="data-table-header-cell cursor-pointer"
-                    onClick={() => handleSort("status")}
-                  >
-                    Status {getSortIndicator("status")}
-                  </th>
-                  <th 
-                    className="data-table-header-cell cursor-pointer"
-                    onClick={() => handleSort("lastUpdated")}
-                  >
-                    Last Updated {getSortIndicator("lastUpdated")}
-                  </th>
-                  <th className="data-table-header-cell w-20">
-                    Action
-                  </th>
+      <div className="bg-white shadow border border-gray-200">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-primary">
+              <tr>
+                <th 
+                  scope="col"
+                  className="px-3 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-16 cursor-pointer"
+                  onClick={() => handleSort("id")}
+                >
+                  Sl No {getSortIndicator("id")}
+                </th>
+                <th 
+                  scope="col"
+                  className="px-3 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort("code")}
+                >
+                  Code {getSortIndicator("code")}
+                </th>
+                <th 
+                  scope="col"
+                  className="px-3 py-3 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort("name")}
+                >
+                  Name {getSortIndicator("name")}
+                </th>
+                <th 
+                  scope="col"
+                  className="px-3 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-20"
+                >
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredAndSortedData.map((uom) => (
+                <tr key={uom.id} className="hover:bg-gray-50">
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
+                    {uom.id}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {uom.code}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                    {uom.name}
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600">
+                      <span className="sr-only">Edit</span>
+                      ⬜
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="data-table-body">
-                {filteredAndSortedData.map((uom) => (
-                  <tr key={uom.id} className="data-table-row">
-                    <td className="data-table-cell text-center">{uom.id}</td>
-                    <td className="data-table-cell font-medium">{uom.code}</td>
-                    <td className="data-table-cell">{uom.name}</td>
-                    <td className="data-table-cell">{uom.description}</td>
-                    <td className="data-table-cell">{uom.category}</td>
-                    <td className="data-table-cell">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        uom.status === 'active' 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {uom.status}
-                      </span>
-                    </td>
-                    <td className="data-table-cell">{uom.lastUpdated}</td>
-                    <td className="data-table-cell">
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600">
-                          <Edit className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600">
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
