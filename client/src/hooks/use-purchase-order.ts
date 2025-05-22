@@ -36,6 +36,9 @@ export function usePurchaseOrder() {
     },
   });
 
+  // Form errors
+  const formErrors = form.formState.errors;
+
   // Line items state
   const [items, setItems] = useState<LineItem[]>([
     {
@@ -151,5 +154,6 @@ export function usePurchaseOrder() {
     total,
     grandTotal,
     handleSubmit,
+    formErrors,
   };
 }
